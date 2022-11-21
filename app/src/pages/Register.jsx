@@ -6,6 +6,7 @@ import "react-toastify/dist/ReactToastify.css";
 import logo from "../assets/logo.png"
 import axios from "axios"
 import {registerRoute} from "../utils/APIRoutes"
+import {Buffer} from "buffer"
 
 function Register() {
   // state
@@ -16,7 +17,7 @@ function Register() {
     password: "",
     confirmPwd: ""
   });
-  useEffect(() => {
+  useEffect(async () => {
     if (localStorage.getItem(process.env.REACT_APP_LOCALHOST_KEY)) {
       navigate("/");
     }
@@ -67,16 +68,18 @@ function Register() {
     e.preventDefault();
     if (handleValidation()) {
       const {username, email, password} = values
+      const buffer = new Buffer("../assets/defaultAvatar.png");
       const { data } = await axios.post(registerRoute, {
         username,
         email,
         password,
+        imageAvatar:buffer.toString("base64")
       });
 
       if (data.status === false) {
         toast.error(data.msg, toastOptions);
       }
-      if (data.status === true) {
+      else {
         localStorage.setItem(
           process.env.REACT_APP_LOCALHOST_KEY,
           JSON.stringify(data.user)
@@ -119,6 +122,7 @@ function Register() {
             placeholder="Confirm your password"
             onChange={(e) => handleChange(e)}
           />
+          <input type="file" name="imageAvatar" onChange={(e) => handleChange(e)}/>
           <span>Already have an account ? <Link to="/login">Login</Link></span>
           <button type="submit">sign up</button>
         </form>

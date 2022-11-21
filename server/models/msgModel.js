@@ -13,7 +13,6 @@ const msgShema = new mongoose.Schema(
       type: mongoose.Types.ObjectId,
       required: true
     },
-    users: Array
   },
   { timestamps: true }
 );
