@@ -1,14 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import styled from "styled-components";
 import Logout from "../components/Logout";
 import ChatInput from "../components/ChatInput";
 import { getAllMessageRoute, sendMessageRoute } from "../utils/APIRoutes";
+import { v4 as uuidv4 } from 'uuid'
 
-function ChatContainer({ currentChat, currentUser }) {
+function ChatContainer({ currentChat, currentUser, socket }) {
   // state variables
+  const scrollRef = useRef();
   const [messages, setMessages] = useState([]);
-  const [msgSended, setMsgSended] = useState("");
   useEffect(async () => {
     if (currentUser._id && currentChat._id) {
       const { data } = await axios.post(getAllMessageRoute, {
@@ -18,6 +19,22 @@ function ChatContainer({ currentChat, currentUser }) {
       setMessages(data);
     }
   }, [currentChat]);
+  useEffect(() => {
+    console.log(socket);
+    if (socket) {
+      socket.on("message-receive", (msg) => {
+        console.log("message received");
+        if (msg) {
+          console.log(msg);
+          const temp_messages = [...messages, { fromSelf: false, msg: msg }];
+          setMessages(temp_messages);
+        }
+      });
+    }
+  }, []);
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({behaviour: 'smooth'});
+  }, [messages])
 
   // comportement
   const handleSendMsg = async (msg) => {
@@ -26,7 +43,9 @@ function ChatContainer({ currentChat, currentUser }) {
       sender: currentUser._id,
       receiver: currentChat._id,
     });
-    setMsgSended(msg);
+    const temp_messages = [...messages, { fromSelf: true, msg: msg }];
+    setMessages(temp_messages);
+    socket.emit("send-message", { msg: msg, to: currentChat._id });
   };
 
   // render
@@ -44,11 +63,11 @@ function ChatContainer({ currentChat, currentUser }) {
       </div>
       <div className="body">
         {messages.map((value, index) => {
-          console.log(value);
           return (
             <div
               className={`message ${value.fromSelf ? "sended" : "received"}`}
-              key={index}
+              key={uuidv4()}
+               ref={scrollRef}
             >
               <div className="content">{value.msg}</div>
             </div>
@@ -94,17 +113,17 @@ const Container = styled.div`
         overflow-wrap: break-word;
       }
       @media only screen and (min-width: 768px) {
-        .content{
+        .content {
           max-width: 50%;
         }
       }
       @media only screen and (min-width: 826px) {
-        .content{
+        .content {
           max-width: 45%;
         }
       }
       @media only screen and (max-width: 640px) {
-        .content{
+        .content {
           max-width: 55%;
         }
       }
