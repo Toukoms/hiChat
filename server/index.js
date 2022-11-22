@@ -44,12 +44,11 @@ io.on("connection", (socket) => {
         onlineUsers.set(userId, socket);
         console.log(userId + " connected");
     })
-
     socket.on('send-message', (data) => {
         const receiver = onlineUsers.get(data.to)
-        if (receiver) {
-            console.log("Message sended from "+ socket.id + " to " + receiver.id);
-            receiver.emit('message-receive', data.msg)
+        const sender = onlineUsers.get(data.from)
+        if (receiver && sender) {
+            socket.to(receiver.id).emit('message-receive', data.msg)
         }
     })
 })

@@ -10,14 +10,14 @@ module.exports.sendMsg = async (req, res, next) => {
       users: [sender, receiver],
     });
     if (msg) {
-      console.log(
-        "Messages: Message sended correctly from id:" +
-          sender +
-          " to id:" +
-          receiver +
-          "\n\t" +
-          message
-      );
+      // console.log(
+      //   "Messages: Message sended correctly from id:" +
+      //     sender +
+      //     " to id:" +
+      //     receiver +
+      //     "\n\t" +
+      //     message
+      // );
       return res.json({ sended: true, msg: message });
     }
     return res.json({ sended: false });
@@ -29,7 +29,6 @@ module.exports.sendMsg = async (req, res, next) => {
 module.exports.getAllMsg = async (req, res, next) => {
   try {
     const { sender, receiver } = req.body;
-    console.log(sender, receiver);
     const allMsg = await msgModel
       .find({
         $or: [
@@ -46,7 +45,7 @@ module.exports.getAllMsg = async (req, res, next) => {
         sharedAt: msg.createdAt,
       };
     });
-    console.log("Messages: Get all messages " + allMsg);
+    // console.log("Messages: Get all messages ");
     return res.json(data);
   } catch (e) {
     next(e);

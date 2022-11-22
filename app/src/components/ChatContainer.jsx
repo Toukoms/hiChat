@@ -4,7 +4,7 @@ import styled from "styled-components";
 import Logout from "../components/Logout";
 import ChatInput from "../components/ChatInput";
 import { getAllMessageRoute, sendMessageRoute } from "../utils/APIRoutes";
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4 } from "uuid";
 
 function ChatContainer({ currentChat, currentUser, socket }) {
   // state variables
@@ -20,21 +20,17 @@ function ChatContainer({ currentChat, currentUser, socket }) {
     }
   }, [currentChat]);
   useEffect(() => {
-    console.log(socket);
     if (socket) {
       socket.on("message-receive", (msg) => {
-        console.log("message received");
         if (msg) {
-          console.log(msg);
-          const temp_messages = [...messages, { fromSelf: false, msg: msg }];
-          setMessages(temp_messages);
+          setMessages((prev) => [...prev, {fromSelf: false, msg: msg}]);
         }
       });
     }
   }, []);
   useEffect(() => {
-    scrollRef.current?.scrollIntoView({behaviour: 'smooth'});
-  }, [messages])
+    scrollRef.current?.scrollIntoView({ behaviour: "smooth" });
+  }, [messages]);
 
   // comportement
   const handleSendMsg = async (msg) => {
@@ -45,7 +41,7 @@ function ChatContainer({ currentChat, currentUser, socket }) {
     });
     const temp_messages = [...messages, { fromSelf: true, msg: msg }];
     setMessages(temp_messages);
-    socket.emit("send-message", { msg: msg, to: currentChat._id });
+    socket.emit("send-message", { msg: msg, to: currentChat._id, from: currentUser._id });
   };
 
   // render
@@ -64,12 +60,12 @@ function ChatContainer({ currentChat, currentUser, socket }) {
       <div className="body">
         {messages.map((value, index) => {
           return (
-            <div
-              className={`message ${value.fromSelf ? "sended" : "received"}`}
-              key={uuidv4()}
-               ref={scrollRef}
-            >
-              <div className="content">{value.msg}</div>
+            <div ref={scrollRef} key={uuidv4()}>
+              <div
+                className={`message ${value.fromSelf ? "sended" : "received"}`}
+              >
+                <div className="content">{value.msg}</div>
+              </div>
             </div>
           );
         })}
@@ -82,6 +78,8 @@ function ChatContainer({ currentChat, currentUser, socket }) {
 const Container = styled.div`
   display: grid;
   grid-template-rows: 15% 70% 15%;
+  overflow: hidden;
+  gap: 0.1rem;
   .chat-header {
     padding: 0.5rem 1rem;
     display: flex;
@@ -101,7 +99,15 @@ const Container = styled.div`
     padding: 1rem;
     flex-direction: column;
     gap: 0.5rem;
-    justify-content: flex-end;
+    overflow: auto;
+    &::-webkit-scrollbar{
+      width: .2rem;
+      &-thumb{
+        width: .1rem;
+        border-radius: 1rem;
+        background-color: #efefef36;
+      }
+    }
     .message {
       display: flex;
       .content {
@@ -109,7 +115,6 @@ const Container = styled.div`
         background-color: #8547a1;
         padding: 0.5rem;
         max-width: 40%;
-        border-radius: 0.5rem;
         overflow-wrap: break-word;
       }
       @media only screen and (min-width: 768px) {
@@ -128,11 +133,17 @@ const Container = styled.div`
         }
       }
     }
-    .receveid {
+    .received {
       justify-content: flex-start;
+      .content {
+        border-radius: 0 .5rem .5rem 0;
+      }
     }
     .sended {
       justify-content: flex-end;
+      .content {
+        border-radius: .5rem 0 0 .5rem;
+      }
     }
   }
 `;

@@ -16,6 +16,10 @@ function ChatInput({ onSendMessage }) {
   const handleChange = (e) => {
     setMsgTosend(e.target.value);
   };
+  const handleSendMsg = (e) => {
+    onSendMessage(msgTosend);
+    setMsgTosend("");
+  };
   return (
     <Container>
       <div className="edit-msg" onClick={handleEmojiPickerHideShow}>
@@ -28,9 +32,10 @@ function ChatInput({ onSendMessage }) {
           placeholder="Type your message here"
           value={msgTosend}
           onChange={handleChange}
+          onKeyDown={(e) => {if (e.key == "Enter") handleSendMsg(e)}}
         />
       </div>
-      <div className="icon-send" onClick={(e) => onSendMessage(msgTosend)}>
+      <div className="icon-send" onClick={handleSendMsg}>
         <IoMdSend />
       </div>
     </Container>
@@ -74,10 +79,10 @@ const Container = styled.div`
       border-radius: 0.3rem;
     }
     @media only screen and (max-width: 640px) {
-        input{
-          font-size: .75rem;
-        }
+      input {
+        font-size: 0.75rem;
       }
+    }
   }
   .icon-send {
     display: flex;
